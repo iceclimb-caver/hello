@@ -1,0 +1,44 @@
+name: AI Code Review
+
+on:
+  push:
+    paths:
+      - '**/*.py'  # Adjust for different file types
+  pull_request:
+    paths:
+      - '**/*.py'
+
+jobs:
+  review_code:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
+        run: pip install openai
+
+      - name: Analyze Code with AI
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          python .github/scripts/review_code.py
+
+      - name: Post Feedback as PR Comment
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const feedback = fs.readFileSync('.github/feedback.txt', 'utf8');
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: feedback
+            });
