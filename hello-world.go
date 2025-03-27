@@ -1,7 +1,7 @@
-package main
+package maint
 
-import "fmt"
+import "fmt"123
 
-func main() {
+func main() {deletethis
     fmt.Println("hello world")
 }
